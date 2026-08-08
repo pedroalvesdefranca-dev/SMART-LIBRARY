@@ -1,11 +1,5 @@
 import sqlite3
-
-#criando banco de dados .db e atualizando ele com a criação das tabelas
-#ja definidas no arquivo tabelas.sql
-with open('sql/tabelas.sql','r',encoding='utf-8') as arquivo_sql:
-    conteudo=arquivo_sql.read()
-
-
+from datetime import datetime
 import tkinter as tk
 from tkinter import *
 
@@ -38,6 +32,7 @@ class Controlador:
         self.esconder_todos(self.tela_login)
         self.menu.lateral.pack(side="left", fill="y")
         self.menu.mostrar("principal")
+        self.menu.mostrar_name()
 
     def esconder_todos(self, tela):
         for frame in tela.frame.values():

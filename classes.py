@@ -1,5 +1,6 @@
 import tkinter as tk
 import sqlite3
+from datetime import datetime
 
 class Banco():
     def __init__(self):
@@ -33,7 +34,9 @@ class Tela_login:
                      "2_cadastro": tk.Frame(janela),
                      "3_cadastro": tk.Frame(janela),
         }
-        
+
+        self.control=False
+        self.control1=False
         self.criar_widgets()
 
     def mostrar(self,nome):
@@ -65,9 +68,9 @@ class Tela_login:
         botao_main_acesso.pack()
 
         mensagem_cadastro=tk.Label(login,text="Não possui login? Realize o cadastro da nossa biblioteca")
-        botao_cadastro=tk.Button(login, text="Cadastrar",width=11,height=2,command=lambda: self.primeira_etapa_cadastro())
-        mensagem_cadastro.pack(side="bottom")
-        botao_cadastro.pack(side="bottom") 
+        botao_cadastro=tk.Button(login, text="Cadastrar",width=11,height=2,command=lambda: self.controlador_cadastro1())
+        mensagem_cadastro.pack(side="bottom", anchor="sw",expand=True)
+        botao_cadastro.pack(side="bottom", anchor="sw",expand=True) 
 
     def acessar_login(self):
 
@@ -99,18 +102,19 @@ class Tela_login:
 
     def primeira_etapa_cadastro(self):
 
+            self.control=True
             primeira_etapa=self.mostrar("1_cadastro")
-            tk.Label(primeira_etapa,text="Preencha Todos os campos a seguir").pack()
+            tk.Label(primeira_etapa,text="Preencha Todos os campos a seguir").pack(expand=True)
     
-            tk.Label(primeira_etapa,text="Nome").pack()
+            tk.Label(primeira_etapa,text="Nome").pack(expand=True)
             self.nome=tk.Entry(primeira_etapa)
             self.nome.pack()
     
-            tk.Label(primeira_etapa,text="Sobrenome").pack()
+            tk.Label(primeira_etapa,text="Sobrenome").pack(expand=True)
             self.sobrenome=tk.Entry(primeira_etapa)
             self.sobrenome.pack()
     
-            tk.Label(primeira_etapa,text="CPF (somente números)").pack()
+            tk.Label(primeira_etapa,text="CPF (somente números)").pack(expand=True)
             self.cpf=tk.Entry(primeira_etapa)
             self.cpf.pack()
     
@@ -132,6 +136,21 @@ class Tela_login:
             erro_mensager_0.pack()
             primeira_etapa.after(8000,erro_mensager_0.pack_forget)
             return
+
+        if not self.nome.get().isalpha():
+            erro_mensager_0=tk.Label(primeira_etapa,text="NOME/SOBRENOME INVALIDO",fg='red')
+            erro_mensager_0.pack()
+            primeira_etapa.after(8000,erro_mensager_0.pack_forget)
+            return
+
+        variavel=self.sobrenome.get().split()
+        for caractere in variavel:
+            if not caractere.isalpha():
+                 erro_mensager_0=tk.Label(primeira_etapa,text="NOME/SOBRENOME INVALIDO",fg='red')
+                 erro_mensager_0.pack()
+                 primeira_etapa.after(8000,erro_mensager_0.pack_forget)
+                 return
+
         try:
             int(self.cpf.get())
         except:
@@ -186,7 +205,7 @@ class Tela_login:
                     self.banco.executar('''INSERT INTO CUSTOMERS (First_name,Last_name,CPF,Cellphone,Email,Registration_Date) 
                     VALUES (?,?,?,?,?,DATE('now'));''',(self.nome.get().lower(),self.sobrenome.get().lower(),
                                                         self.cpf.get(),self.celular.get(),self.email.get()))
-                    self.terceira_etapa_cadastro()
+                    self.controlador_cadastro2()
     
                 except Exception as erro:
                     erro_mensager_2=tk.Label(primeira_etapa,text=f"Erro ao realizar cadastro, tente novamente {erro}",fg='red')
@@ -198,18 +217,45 @@ class Tela_login:
            
     def terceira_etapa_cadastro(self):
 
+        self.control1=True
+
         pagina_finalizacao_cadastro=self.mostrar("2_cadastro")
 
         tk.Label(pagina_finalizacao_cadastro,text="CADASTRO REALIZADO COM SUCESSO").pack()
         tk.Label(pagina_finalizacao_cadastro,text="SEU ID DE LOGIN É:").pack()
         
         id_do_usuario=self.banco.buscar_one("SELECT ID FROM CUSTOMERS WHERE CPF=?;",(self.cpf.get(),))
-        tk.Label(pagina_finalizacao_cadastro,text=f"({id_do_usuario[0]})",fg="blue").pack()
+        self.mensagem_2=tk.Label(pagina_finalizacao_cadastro,text=f"({id_do_usuario[0]})",fg="blue")
+        self.mensagem_2.pack()
         
         tk.Button(pagina_finalizacao_cadastro,text="retornar ao login",command=lambda: self.quarta_etapa_cadastro()).pack()
 
     def quarta_etapa_cadastro(self):
-        self.mostrar("login")                                              
+        self.mostrar("login")
+
+    def controlador_cadastro1(self):
+        
+        if self.control==False:
+            self.primeira_etapa_cadastro()
+            return
+        else:
+            self.mostrar("1_cadastro")
+            self.nome.delete(0,tk.END)
+            self.sobrenome.delete(0,tk.END)
+            self.cpf.delete(0,tk.END)
+            self.celular.delete(0,tk.END)
+            self.email.delete(0,tk.END)
+
+    def controlador_cadastro2(self):
+        if self.control1==False:
+            self.terceira_etapa_cadastro()   
+        else:
+            
+            id_do_usuario=self.banco.buscar_one("SELECT ID FROM CUSTOMERS WHERE CPF=?;",(self.cpf.get(),))
+            self.mensagem_2.config(text=f"({id_do_usuario[0]})",fg="blue")
+            self.mostrar("2_cadastro")
+
+
 
 class Menu:
     def __init__(self, banco, janela, controlador):
@@ -220,6 +266,7 @@ class Menu:
         self.lateral = tk.Frame(janela, width=180, bg="#2c3e50")
         self.lateral.pack(side="left", fill="y")
         self.lateral.pack_propagate(False)
+        
 
         # só as telas que alternam ficam no dicionário
         self.frame = {
@@ -239,5 +286,34 @@ class Menu:
         principal = self.mostrar("principal")
         tk.Label(principal, text="Bem-vindo ao Menu").pack()
 
-        botao_sair = tk.Button(self.lateral, text="Sair", command=self.controlador.ir_para_login)
+        botao_sair = tk.Button(self.lateral, text="Sair", command=lambda: self.retornar_ao_login())
         botao_sair.pack(side="bottom", pady=10)
+        self.label_saudacao = tk.Label(principal, text="")
+        self.label_saudacao.pack()
+        
+
+    def mostrar_name(self):
+
+        try:
+            agora=datetime.now()
+            horas=agora.hour
+            if 5<=horas<12:
+                saudacao="Bom Dia"
+            elif 12<=horas<18:
+                saudacao="Boa Tarde"
+            else:
+                saudacao="Boa Noite"        
+
+            id_acessado=self.controlador.tela_login.id_input.get()
+            resultado=self.banco.buscar_one("SELECT First_Name,Last_Name FROM CUSTOMERS WHERE ID=?;",(id_acessado,))
+            nome,sobrenome=resultado
+            self.label_saudacao.config(text=f"{saudacao}! {nome.title()}, {sobrenome.title()}")
+            
+        except:
+            return      
+
+    def retornar_ao_login(self):
+        self.controlador.tela_login.id_input.delete(0,tk.END)
+        self.controlador.tela_login.cpf_input.delete(0,tk.END)
+        self.controlador.ir_para_login()
+            
