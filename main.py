@@ -6,13 +6,11 @@ from tkinter import *
 from classes import *
 
 
-
-
 class Controlador:
     def __init__(self):
         self.janela = tk.Tk()
         self.janela.title("Biblioteca")
-        self.janela.geometry("400x400")
+        self.janela.geometry("800x600")
 
         self.banco = Banco()
 

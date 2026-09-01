@@ -34,7 +34,7 @@ class Tela_login:
                      "2_cadastro": tk.Frame(janela),
                      "3_cadastro": tk.Frame(janela),
         }
-
+        
         self.control=False
         self.control1=False
         self.criar_widgets()
@@ -42,14 +42,26 @@ class Tela_login:
     def mostrar(self,nome):
          for frame in self.frame.values():
               frame.pack_forget()
-         self.frame[nome].pack()
+         self.frame[nome].pack(fill="both", expand=True)
          return self.frame[nome]
 
     def criar_widgets(self):
 
         login=self.mostrar("login")
+        bloco_inferior=tk.Frame(login)
+        NUM_LINHAS=16
+        NUM_COLUNAS=9
 
-        tk.Label(login,text="Bem-Vindo(a)").pack()
+        for i in range(NUM_LINHAS):
+            login.rowconfigure(i, weight=1, minsize=50)
+
+        for j in range(NUM_COLUNAS):
+            login.columnconfigure(j, weight=1, minsize=50)
+
+        self.error_label=tk.Label(login, text="", fg="red")
+        self.error_label.grid(row=7, column=1, columnspan=7)
+
+        tk.Label(login,text="Bem-Vindo(a)",font=("Arial", 16, "bold")).grid(row=0,column=1,columnspan=7)
 
         id_main_text=tk.Label(login,text="ID")
         self.id_input=tk.Entry(login)
@@ -58,31 +70,34 @@ class Tela_login:
         cpf_main_text=tk.Label(login,text="CPF")
         self.cpf_input=tk.Entry(login)
 
-
-        id_main_text.pack()
-        self.id_input.pack()
-        cpf_main_text.pack()
-        self.cpf_input.pack()
+        
+        id_main_text.grid(row=2,column=1,columnspan=7,padx=10, pady=10)
+        self.id_input.grid(row=3,column=1,columnspan=7,padx=10, pady=10)
+        cpf_main_text.grid(row=4,column=1,columnspan=7,padx=10, pady=10)
+        self.cpf_input.grid(row=5,column=1,columnspan=7,padx=10, pady=10)
 
         botao_main_acesso=tk.Button(login, text="acessar",width=10,height=2,command=lambda:self.acessar_login())
-        botao_main_acesso.pack()
+        botao_main_acesso.grid(row=6,column=1,columnspan=7)
 
-        mensagem_cadastro=tk.Label(login,text="Não possui login? Realize o cadastro da nossa biblioteca")
-        botao_cadastro=tk.Button(login, text="Cadastrar",width=11,height=2,command=lambda: self.controlador_cadastro1())
-        mensagem_cadastro.pack(side="bottom", anchor="sw",expand=True)
-        botao_cadastro.pack(side="bottom", anchor="sw",expand=True) 
+        bloco_inferior.grid(row=13,column=7,rowspan=2)
+        mensagem_cadastro1=tk.Label(bloco_inferior,text="Não possui login?")
+        mensagem_cadastro2=tk.Label(bloco_inferior,text="Realize o cadastro da nossa biblioteca")
+        botao_cadastro=tk.Button(bloco_inferior, text="Cadastrar-se",width=11,height=2,command=lambda:self.primeira_etapa_cadastro())
+        
+        mensagem_cadastro1.pack()
+        mensagem_cadastro2.pack()
+        botao_cadastro.pack()
+    
 
     def acessar_login(self):
 
          login=self.mostrar("login")
-
          try:
                 verificador1=int(self.id_input.get())
                 verificador2=int(self.cpf_input.get())
          except:
-                mensagem=tk.Label(login,text="ID/CPF INVALIDOS",fg='red')
-                mensagem.pack()
-                login.after(3000,mensagem.pack_forget)
+                self.error_label.config(text="ID/CPF INVALIDOS")  
+                login.after(3000,lambda:self.error_label.config(text=""))     
                 return    
         
          try:
@@ -92,42 +107,41 @@ class Tela_login:
                 if resultado[0]:
                     self.controlador.ir_para_menu()
                 else:
-                    mensagem=tk.Label(login,text="ID/CPF INVALIDOS",fg='red')
-                    mensagem.pack()
-                    login.after(3000,mensagem.pack_forget) 
-                          
+                    self.error_label.config(text=f"ERRO AO TENTAR CONECTAR AO BANCO DE DADOS {erro}")
+                    login.after(3000,lambda:self.error_label.config(text=""))   
          except Exception as erro:
-                tk.Label(login,text=f"ERRO AO TENTAR CONECTAR AO BANCO DE DADOS {erro}").pack() 
+                self.error_label.config(text=f"ERRO AO TENTAR CONECTAR AO BANCO DE DADOS {erro}")  
+                login.after(3000,lambda:self.error_label.config(text=""))   
                 return    
-
+   
     def primeira_etapa_cadastro(self):
 
             self.control=True
             primeira_etapa=self.mostrar("1_cadastro")
-            tk.Label(primeira_etapa,text="Preencha Todos os campos a seguir").pack(expand=True)
+            tk.Label(primeira_etapa,text="Preencha Todos os campos a seguir").pack(pady=10)
     
-            tk.Label(primeira_etapa,text="Nome").pack(expand=True)
+            tk.Label(primeira_etapa,text="Nome").pack(pady=10)
             self.nome=tk.Entry(primeira_etapa)
             self.nome.pack()
     
-            tk.Label(primeira_etapa,text="Sobrenome").pack(expand=True)
+            tk.Label(primeira_etapa,text="Sobrenome").pack(pady=10)
             self.sobrenome=tk.Entry(primeira_etapa)
             self.sobrenome.pack()
     
-            tk.Label(primeira_etapa,text="CPF (somente números)").pack(expand=True)
+            tk.Label(primeira_etapa,text="CPF (somente números)").pack(pady=10)
             self.cpf=tk.Entry(primeira_etapa)
             self.cpf.pack()
     
-            tk.Label(primeira_etapa,text="Celular (somente números deve conter o DDD)").pack()
+            tk.Label(primeira_etapa,text="Celular (somente números deve conter o DDD)").pack(pady=10)
             self.celular=tk.Entry(primeira_etapa)
-            self.celular.pack()
+            self.celular.pack(pady=10)
     
-            tk.Label(primeira_etapa,text="email").pack()
+            tk.Label(primeira_etapa,text="email").pack(pady=10)
             self.email=tk.Entry(primeira_etapa)
-            self.email.pack()
+            self.email.pack(pady=10)
     
             botao_de_finalizacao_cadastro=tk.Button(primeira_etapa,text="Finalizar",width=11,height=2,command=lambda:self.segunda_etapa_cadastro() )
-            botao_de_finalizacao_cadastro.pack()
+            botao_de_finalizacao_cadastro.pack(pady=10)
 
     def segunda_etapa_cadastro(self):
         primeira_etapa=self.mostrar("1_cadastro")
