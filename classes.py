@@ -23,45 +23,39 @@ class Banco():
         return self.cursor.fetchone()      
 
 
-class Tela_login:
+class Tela_Inicial:
     def __init__(self,banco,janela,controlador):
         
         self.banco=banco
         self.controlador=controlador
-        self.frame={
-                     "login": tk.Frame(janela),
-                     "1_cadastro": tk.Frame(janela),
-                     "2_cadastro": tk.Frame(janela),
-                     "3_cadastro": tk.Frame(janela),
-        }
-        
+        self.frame={"login":tk.Frame(janela)}
         self.control=False
         self.control1=False
+        self.NUM_LINHAS=16
+        self.NUM_COLUNAS=9
         self.criar_widgets()
 
     def mostrar(self,nome):
-         for frame in self.frame.values():
-              frame.pack_forget()
-         self.frame[nome].pack(fill="both", expand=True)
-         return self.frame[nome]
+        self.frame[nome].pack(fill="both", expand=True)
+        return self.frame[nome]
 
     def criar_widgets(self):
-
+        
         login=self.mostrar("login")
         bloco_inferior=tk.Frame(login)
-        NUM_LINHAS=16
-        NUM_COLUNAS=9
+        
 
-        for i in range(NUM_LINHAS):
-            login.rowconfigure(i, weight=1, minsize=50)
+        for i in range(self.NUM_LINHAS):
+            login.rowconfigure(i,weight=1)
 
-        for j in range(NUM_COLUNAS):
-            login.columnconfigure(j, weight=1, minsize=50)
+        for j in range(self.NUM_COLUNAS):
+            login.columnconfigure(j, weight=1)
 
+        login.rowconfigure(8, weight=3) 
         self.error_label=tk.Label(login, text="", fg="red")
         self.error_label.grid(row=7, column=1, columnspan=7)
 
-        tk.Label(login,text="Bem-Vindo(a)",font=("Arial", 16, "bold")).grid(row=0,column=1,columnspan=7)
+        tk.Label(login,text="Bem-Vindo(a)",font=("Arial", 16, "bold")).grid(row=0,column=1,columnspan=7,pady=20)
 
         id_main_text=tk.Label(login,text="ID")
         self.id_input=tk.Entry(login)
@@ -71,27 +65,28 @@ class Tela_login:
         self.cpf_input=tk.Entry(login)
 
         
-        id_main_text.grid(row=2,column=1,columnspan=7,padx=10, pady=10)
-        self.id_input.grid(row=3,column=1,columnspan=7,padx=10, pady=10)
-        cpf_main_text.grid(row=4,column=1,columnspan=7,padx=10, pady=10)
-        self.cpf_input.grid(row=5,column=1,columnspan=7,padx=10, pady=10)
+        id_main_text.grid(row=2,column=1,columnspan=7,padx=10, pady=5)
+        self.id_input.grid(row=3,column=1,columnspan=7,padx=10, pady=5)
+        cpf_main_text.grid(row=4,column=1,columnspan=7,padx=10, pady=5)
+        self.cpf_input.grid(row=5,column=1,columnspan=7,padx=10, pady=5)
 
         botao_main_acesso=tk.Button(login, text="acessar",width=10,height=2,command=lambda:self.acessar_login())
         botao_main_acesso.grid(row=6,column=1,columnspan=7)
 
-        bloco_inferior.grid(row=13,column=7,rowspan=2)
+        bloco_inferior.grid(row=15,column=0,columnspan=9,sticky="se",padx=15,pady=15)
         mensagem_cadastro1=tk.Label(bloco_inferior,text="Não possui login?")
         mensagem_cadastro2=tk.Label(bloco_inferior,text="Realize o cadastro da nossa biblioteca")
-        botao_cadastro=tk.Button(bloco_inferior, text="Cadastrar-se",width=11,height=2,command=lambda:self.primeira_etapa_cadastro())
+        botao_cadastro=tk.Button(bloco_inferior, text="Cadastrar-se",width=11,height=2,command=lambda:self.controlador.ir_para_cadastramento())
         
         mensagem_cadastro1.pack()
         mensagem_cadastro2.pack()
-        botao_cadastro.pack()
+        botao_cadastro.pack(pady=5)
     
 
     def acessar_login(self):
 
          login=self.mostrar("login")
+         
          try:
                 verificador1=int(self.id_input.get())
                 verificador2=int(self.cpf_input.get())
@@ -113,95 +108,135 @@ class Tela_login:
                 self.error_label.config(text=f"ERRO AO TENTAR CONECTAR AO BANCO DE DADOS {erro}")  
                 login.after(3000,lambda:self.error_label.config(text=""))   
                 return    
-   
-    def primeira_etapa_cadastro(self):
 
+class Cadastramento:
+    def __init__(self,banco,janela,controlador):
+        self.banco=banco
+        self.controlador=controlador
+        self.frame={
+                "1_cadastro": tk.Frame(janela),
+                "2_cadastro": tk.Frame(janela),
+                "3_cadastro": tk.Frame(janela),
+                }
+                
+        self.control=False
+        self.control1=False
+        self.NUM_LINHAS=16
+        self.NUM_COLUNAS=9
+        self.primeira_etapa_cadastro()
+    
+    def mostrar(self,nome):
+             for frame in self.frame.values():
+                  frame.pack_forget()
+             self.frame[nome].pack(fill="both", expand=True)
+             return self.frame[nome]
+        
+    def primeira_etapa_cadastro(self):
             self.control=True
             primeira_etapa=self.mostrar("1_cadastro")
-            tk.Label(primeira_etapa,text="Preencha Todos os campos a seguir").pack(pady=10)
+            bloco_inferior=tk.Frame(primeira_etapa)
+
+            for i in range(self.NUM_LINHAS):
+                primeira_etapa.rowconfigure(i, weight=1)
+            
+            for j in range(self.NUM_COLUNAS):
+                primeira_etapa.columnconfigure(j, weight=1)
+
+            titulo=tk.Label(primeira_etapa,text="Preencha Todos os campos a seguir")
     
-            tk.Label(primeira_etapa,text="Nome").pack(pady=10)
+            m_nome=tk.Label(primeira_etapa,text="Nome")
             self.nome=tk.Entry(primeira_etapa)
-            self.nome.pack()
     
-            tk.Label(primeira_etapa,text="Sobrenome").pack(pady=10)
+            m_sobrenome=tk.Label(primeira_etapa,text="Sobrenome")
             self.sobrenome=tk.Entry(primeira_etapa)
-            self.sobrenome.pack()
     
-            tk.Label(primeira_etapa,text="CPF (somente números)").pack(pady=10)
+            m_cpf=tk.Label(primeira_etapa,text="CPF (somente números)")
             self.cpf=tk.Entry(primeira_etapa)
-            self.cpf.pack()
+            
     
-            tk.Label(primeira_etapa,text="Celular (somente números deve conter o DDD)").pack(pady=10)
+            m_celular=tk.Label(primeira_etapa,text="Celular (somente números deve conter o DDD)")
             self.celular=tk.Entry(primeira_etapa)
-            self.celular.pack(pady=10)
+            
     
-            tk.Label(primeira_etapa,text="email").pack(pady=10)
+            m_email=tk.Label(primeira_etapa,text="email")
             self.email=tk.Entry(primeira_etapa)
-            self.email.pack(pady=10)
+            
     
             botao_de_finalizacao_cadastro=tk.Button(primeira_etapa,text="Finalizar",width=11,height=2,command=lambda:self.segunda_etapa_cadastro() )
-            botao_de_finalizacao_cadastro.pack(pady=10)
+            self.error_label_cadastro=tk.Label(primeira_etapa, text="", fg="red")
+
+            titulo.grid(row=0,column=1,columnspan=7,pady=20)
+            m_nome.grid(row=2,column=1,columnspan=7,padx=10,pady=10)
+            self.nome.grid(row=3,column=1,columnspan=7,padx=5,pady=5)
+            m_sobrenome.grid(row=4,column=1,columnspan=7,padx=10,pady=10)
+            self.sobrenome.grid(row=5,column=1,columnspan=7,padx=5,pady=5)
+            m_cpf.grid(row=6,column=1,columnspan=7,padx=10,pady=10)
+            self.cpf.grid(row=7,column=1,columnspan=7,padx=5,pady=5)
+            m_celular.grid(row=8,column=1,columnspan=7,padx=10,pady=10)
+            self.celular.grid(row=9,column=1,columnspan=7,padx=5,pady=5)
+            m_email.grid(row=10,column=1,columnspan=7,padx=10,pady=10)
+            self.email.grid(row=11,column=1,columnspan=7,padx=5,pady=5)
+            botao_de_finalizacao_cadastro.grid(row=12,column=1,columnspan=7,padx=10,pady=10)
+            self.error_label_cadastro.grid(row=13,column=1,columnspan=7,padx=15,pady=15)
+
+            primeira_etapa.rowconfigure(14, weight=3)
+
+
+            bloco_inferior.grid(row=15,column=0,columnspan=9,sticky="se",padx=15,pady=15)
+            tk.Button(bloco_inferior,text="Voltar",width=6,height=2,command=lambda:self.quarta_etapa_cadastro()).pack()
+
+            
 
     def segunda_etapa_cadastro(self):
         primeira_etapa=self.mostrar("1_cadastro")
         if self.nome.get()=="" or self.sobrenome.get()=="":
-            erro_mensager_0=tk.Label(primeira_etapa,text="NOME/SOBRENOME INVALIDO",fg='red')
-            erro_mensager_0.pack()
-            primeira_etapa.after(8000,erro_mensager_0.pack_forget)
+            self.error_label_cadastro.config(text="NOME/SOBRENOME INVALIDO")
+            primeira_etapa.after(8000,lambda:self.error_label_cadastro.config(text=""))
             return
 
         if not self.nome.get().isalpha():
-            erro_mensager_0=tk.Label(primeira_etapa,text="NOME/SOBRENOME INVALIDO",fg='red')
-            erro_mensager_0.pack()
-            primeira_etapa.after(8000,erro_mensager_0.pack_forget)
-            return
+             self.error_label_cadastro.config(text="NOME/SOBRENOME INVALIDO")
+             primeira_etapa.after(8000,lambda:self.error_label_cadastro.config(text=""))
+             return
 
         variavel=self.sobrenome.get().split()
         for caractere in variavel:
             if not caractere.isalpha():
-                 erro_mensager_0=tk.Label(primeira_etapa,text="NOME/SOBRENOME INVALIDO",fg='red')
-                 erro_mensager_0.pack()
-                 primeira_etapa.after(8000,erro_mensager_0.pack_forget)
-                 return
+                  self.error_label_cadastro.config(text="NOME/SOBRENOME INVALIDO")
+                  primeira_etapa.after(8000,lambda:self.error_label_cadastro.config(text=""))
+                  return
 
         try:
             int(self.cpf.get())
         except:
-            erro_mensager_0=tk.Label(primeira_etapa,text="cpf invalido",fg='red')
-            erro_mensager_0.pack()
-            primeira_etapa.after(8000,erro_mensager_0.pack_forget)
+            self.error_label_cadastro.config(text="CPF INVALIDO")
+            primeira_etapa.after(8000,lambda:self.error_label_cadastro.config(text=""))
             return
     
         contador_caracteres=len(self.cpf.get())
         if contador_caracteres!=11:
-           erro_mensager_0=tk.Label(primeira_etapa,text="cpf invalido",fg='red')
-           erro_mensager_0.pack()
-           primeira_etapa.after(8000,erro_mensager_0.pack_forget)
+           self.error_label_cadastro.config(text="CPF INVALIDO")
+           primeira_etapa.after(8000,lambda:self.error_label_cadastro.config(text=""))
            return
            
         
         try:
             int(self.celular.get())
         except:
-              erro_mensager_0=tk.Label(primeira_etapa,text="celular invalido",fg='red')
-              erro_mensager_0.pack()
-              primeira_etapa.after(8000,erro_mensager_0.pack_forget)
+              self.error_label_cadastro.config(text="CELULAR INVALIDO")
+              primeira_etapa.after(8000,lambda:self.error_label_cadastro.config(text=""))
               return
                
         contador_caracteres=len(self.celular.get())
         if contador_caracteres!=11:
-            erro_mensager_0=tk.Label(primeira_etapa,text="celular invalido",fg='red')
-            erro_mensager_0.pack()
-            primeira_etapa.after(8000,erro_mensager_0.pack_forget)
+            self.error_label_cadastro.config(text="CELULAR INVALIDO")
+            primeira_etapa.after(8000,lambda:self.error_label_cadastro.config(text=""))
             return
             
-        validador_email1=".com"
-        validador_email2="@"
-        if validador_email1 not in self.email.get() or validador_email2 not in self.email.get():
-           erro_mensager_0=tk.Label(primeira_etapa,text="email invalido",fg='red')
-           erro_mensager_0.pack()
-           primeira_etapa.after(8000,erro_mensager_0.pack_forget)
+        validador_email="@"
+        if validador_email not in self.email.get():
+           self.error_label_cadastro.config(text="EMAIL INVALIDO")
+           primeira_etapa.after(8000,lambda:self.error_label_cadastro.config(text=""))
            return
            
     
@@ -209,11 +244,11 @@ class Tela_login:
             resposta=self.banco.buscar_one("SELECT EXISTS(SELECT 1 FROM CUSTOMERS WHERE CPF=?);",(self.cpf.get(),))
         
             if resposta[0]:
-                erro_mensager_=tk.Label(primeira_etapa,text="CPF já possui cadastro",fg='red')
-                erro_mensager_.pack()
-                primeira_etapa.after(8000,erro_mensager_.pack_forget)
+             self.error_label_cadastro.config(text="CPF JÁ CADASTRADO")
+             primeira_etapa.after(8000,lambda:self.error_label_cadastro.config(text=""))
+             return
             
-                return
+               
             else:
                 try:
                     self.banco.executar('''INSERT INTO CUSTOMERS (First_name,Last_name,CPF,Cellphone,Email,Registration_Date) 
@@ -222,12 +257,13 @@ class Tela_login:
                     self.controlador_cadastro2()
     
                 except Exception as erro:
-                    erro_mensager_2=tk.Label(primeira_etapa,text=f"Erro ao realizar cadastro, tente novamente {erro}",fg='red')
-                    erro_mensager_2.pack()
-                    primeira_etapa.after(8000,erro_mensager_2.pack_forget)
+                    self.error_label_cadastro.config(primeira_etapa,text=f"Erro ao realizar cadastro, tente novamente {erro}")
+                    primeira_etapa.after(8000,lambda:self.error_label_cadastro.config(text=""))
                     return
         except Exception as e:
-            tk.Label(primeira_etapa,text=f"Erro ao tentar conectar ao servidor {e}",fg='red')
+            self.error_label_cadastro.config(primeira_etapa,text=f"Erro ao Tentar Conectar ao Banco de Dados, tente novamente {erro}")
+            primeira_etapa.after(8000,lambda:self.error_label_cadastro.config(text=""))
+            return
            
     def terceira_etapa_cadastro(self):
 
@@ -245,7 +281,10 @@ class Tela_login:
         tk.Button(pagina_finalizacao_cadastro,text="retornar ao login",command=lambda: self.quarta_etapa_cadastro()).pack()
 
     def quarta_etapa_cadastro(self):
-        self.mostrar("login")
+        self.controlador.tela_login.id_input.delete(0,tk.END)
+        self.controlador.tela_login.cpf_input.delete(0,tk.END)
+        self.controlador.inicio_programa()
+        self.controlador.inicio_programa()
 
     def controlador_cadastro1(self):
         
@@ -329,5 +368,5 @@ class Menu:
     def retornar_ao_login(self):
         self.controlador.tela_login.id_input.delete(0,tk.END)
         self.controlador.tela_login.cpf_input.delete(0,tk.END)
-        self.controlador.ir_para_login()
+        self.controlador.inicio_programa()
             
